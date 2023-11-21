@@ -28,7 +28,7 @@ def encrypt_image(image_path: str, key: bytes) -> bytes:
     try:
         with open(image_path, 'rb') as file:
             image_data = file.read()
-            #im = Image.open(image_path)
+            im = Image.open(image_path)
     except FileNotFoundError:
         raise FileNotFoundError(f"El archivo '{image_path}' no se encontró.")
     except IOError:
