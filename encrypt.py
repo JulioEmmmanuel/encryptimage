@@ -85,63 +85,92 @@ def decrypt_image(image_path: str, key: bytes) -> bytes:
     # Extraer el vector de inicializacion
     iv = encrypted_image_data[:AES.block_size]
  
-    # Crear un objeto de cifrado AES con la llave provisionada y el vector de inicialización extraído 
-    cipher = AES.new(key, AES.MODE_CBC, iv)
- 
-    # Desencriptar los datos de imagen
-    decrypted_image_data = cipher.decrypt(encrypted_image_data[AES.block_size:])
- 
-    # Eliminar los datos adicionados a la imagen
-    unpadded_image_data = unpad(decrypted_image_data, AES.block_size)
- 
-    return unpadded_image_data
- 
+    try:
+        # Crear un objeto de cifrado AES con la llave provisionada y el vector de inicialización extraído 
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+    
+        # Desencriptar los datos de imagen
+        decrypted_image_data = cipher.decrypt(encrypted_image_data[AES.block_size:])
+    
+        # Eliminar los datos adicionados a la imagen
+        unpadded_image_data = unpad(decrypted_image_data, AES.block_size)
+    
+        return unpadded_image_data
+    except ValueError:
+        raise ValueError("La clave ingresada es incorrecta.")
+    
  
 # Solicitar al usuario imagen y clave
 
 print("¿Qué deseas hacer?")
 print("-- 1: Encriptar una imagen")
 print("-- 2: Desencriptar una imagen")
-opcion = int(input())
-if(opcion == 1):
-    image_path = input("Ingresa la ruta de la imagen: ")
-    while len(image_path) == 0:
-        print("Debes ingresar una ruta válida")
+print("-- 3: Salir")
+
+try:
+    opcion = input()
+    opcion = int(opcion)
+except ValueError:
+    print("Debes ingresar un número")
+while(opcion != 3):
+    if(opcion == 1):
         image_path = input("Ingresa la ruta de la imagen: ")
+        while len(image_path) == 0:
+            print("Debes ingresar una ruta válida")
+            image_path = input("Ingresa la ruta de la imagen: ")
 
-    encryption_key =  input("Ingresa una clave de encriptación de 16 caracteres: ")
-    while len(encryption_key) != 16:
-        print("Debes ingresar una clave de 16 carateres")
-        encryption_key = input("Ingresa una clave de encriptación: ")
-    encryption_bytes = bytes(encryption_key, 'utf-8')
+        encryption_key =  input("Ingresa una clave de encriptación de 16 caracteres: ")
+        while len(encryption_key) != 16:
+            print("Debes ingresar una clave de 16 carateres")
+            encryption_key = input("Ingresa una clave de encriptación: ")
+        encryption_bytes = bytes(encryption_key, 'utf-8')
 
-    # Encriptar imagen
-    encrypted_image_data = encrypt_image(image_path, encryption_bytes)
+        # Encriptar imagen
+        try: 
+            encrypted_image_data = encrypt_image(image_path, encryption_bytes)
 
-    encrypted_image_path = "./encrypted_image.jpg"
-    with open(encrypted_image_path, 'wb') as file:
-        file.write(encrypted_image_data)
-elif(opcion == 2):
-    image_path = input("Ingresa la ruta de la imagen a desencriptar: ")
-    while len(image_path) == 0:
-        print("Debes ingresar una ruta válida")
-        image_path = input("Ingresa la ruta de la imagen: ")
+            encrypted_image_path = "./encrypted_image.jpg"
+            with open(encrypted_image_path, 'wb') as file:
+                file.write(encrypted_image_data)
+            print("Se encriptó la imagen")
+        except Exception as e:
+            print(e)
+    elif(opcion == 2):
+        image_path = input("Ingresa la ruta de la imagen a desencriptar: ")
+        while len(image_path) == 0:
+            print("Debes ingresar una ruta válida")
+            image_path = input("Ingresa la ruta de la imagen: ")
 
-    encryption_key =  input("Ingresa una clave de encriptación de 16 caracteres: ")
-    while len(encryption_key) != 16:
-        print("Debes ingresar una clave de 16 carateres")
-        encryption_key = input("Ingresa una clave de encriptación: ")
-    encryption_bytes = bytes(encryption_key, 'utf-8')
+        encryption_key =  input("Ingresa una clave de encriptación de 16 caracteres: ")
+        while len(encryption_key) != 16:
+            print("Debes ingresar una clave de 16 carateres")
+            encryption_key = input("Ingresa una clave de encriptación: ")
+        encryption_bytes = bytes(encryption_key, 'utf-8')
 
-    # Desencriptar imagen
-    decrypted_image_data = decrypt_image(image_path, encryption_bytes)
-    
-    # Guardar la imagen en un nuevo archivo
-    decrypted_image_path = "./decrypted_image.jpg"
-    with open(decrypted_image_path, 'wb') as file:
-        file.write(decrypted_image_data)
-else:
-    print("Debes ingresar una opcion valida, vuelve a intentarlo")
+        try:
+            # Desencriptar imagen
+            decrypted_image_data = decrypt_image(image_path, encryption_bytes)
+            
+            # Guardar la imagen en un nuevo archivo
+            decrypted_image_path = "./decrypted_image.jpg"
+            with open(decrypted_image_path, 'wb') as file:
+                file.write(decrypted_image_data)
+            print("Se desencriptó la imagen")
+        except Exception as e:
+            print(e)
+    else:
+        print("Debes ingresar una opcion valida, vuelve a intentarlo")
+
+    print("¿Qué deseas hacer?")
+    print("-- 1: Encriptar una imagen")
+    print("-- 2: Desencriptar una imagen")
+    print("-- 3: Salir")
+    try:
+        opcion = input()
+        opcion = int(opcion)
+    except ValueError:
+        print("Debes ingresar un número")
+
 
 
  
