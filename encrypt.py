@@ -5,43 +5,43 @@ from Crypto.Random import get_random_bytes
  
 def encrypt_image(image_path: str, key: bytes) -> bytes:
     """
-    Encrypts an image file using AES encryption algorithm.
+    Encripta una imagen usando el algoritmo de encriptacion AES.
  
-    Parameters:
+    Parametros:
     - image_path: str
-        The path to the image file to be encrypted.
+        Ruta de la imagen.
     - key: bytes
-        The encryption key to be used for AES encryption.
+        La clave de encriptacion.
  
-    Returns:
+    Regresa:
     - bytes
-        The encrypted image data.
+        La imagen encriptada.
  
-    Raises:
+    Lanza error:
     - FileNotFoundError:
-        If the image file specified by 'image_path' does not exist.
+         Si la imagen no se encontro
     """
  
-    # Read the image file
+    # Lee la imagen
     try:
         with open(image_path, 'rb') as file:
             image_data = file.read()
     except FileNotFoundError:
         raise FileNotFoundError(f"Image file '{image_path}' not found.")
  
-    # Generate a random initialization vector (IV)
+    # Genera un vector de inicializacion aleatorio
     iv = get_random_bytes(AES.block_size)
  
-    # Create an AES cipher object with the provided key and AES.MODE_CBC mode
+    # Crea un objeto de cifrado con AES usando la llave privada
     cipher = AES.new(key, AES.MODE_CBC, iv)
  
-    # Pad the image data to match the AES block size
+    #  Rellenar los datos de la imagen para que cumple con el tamaño del bloque
     padded_image_data = pad(image_data, AES.block_size)
  
-    # Encrypt the padded image data
+    # Encriptar los datos de la imagen
     encrypted_image_data = cipher.encrypt(padded_image_data)
  
-    # Prepend the IV to the encrypted image data
+    # Agregar el vector de inicializacion a los datos de la imagen encryptada
     encrypted_image_data_with_iv = iv + encrypted_image_data
  
     return encrypted_image_data_with_iv
@@ -49,57 +49,67 @@ def encrypt_image(image_path: str, key: bytes) -> bytes:
  
 def decrypt_image(encrypted_image_data: bytes, key: bytes) -> bytes:
     """
-    Decrypts an encrypted image using AES encryption algorithm.
+
+    Desencripta una imagen encriptada usando el algoritmo AES.
  
-    Parameters:
+    Parametros:
     - encrypted_image_data: bytes
-        The encrypted image data.
+        Los datos de la imagen encriptada.
     - key: bytes
-        The encryption key used for AES encryption.
+        La llave de encriptacion
  
-    Returns:
+    Regresa:
     - bytes
-        The decrypted image data.
+        Los datos de la imagen desencriptada.
  
-    Raises:
+    Lanza error:
     - ValueError:
-        If the length of the encrypted image data is invalid.
+        Si la longitud de la imagen encriptada es invalida
     """
  
-    # Check if the length of the encrypted image data is valid
+    # Vertificar la longitud de los datos de la imagen encriptada
     if len(encrypted_image_data) < AES.block_size:
         raise ValueError("Invalid length of encrypted image data.")
  
-    # Extract the IV from the encrypted image data
+    # Extraer el vector de inicializacion
     iv = encrypted_image_data[:AES.block_size]
  
-    # Create an AES cipher object with the provided key, AES.MODE_CBC mode, and the extracted IV
+    # Crear un objeto de cifrado AES con la llave provisionada y el vector de inicialización extraído 
     cipher = AES.new(key, AES.MODE_CBC, iv)
  
-    # Decrypt the encrypted image data (excluding the IV)
+    # Desencriptar los datos de imagen
     decrypted_image_data = cipher.decrypt(encrypted_image_data[AES.block_size:])
  
-    # Unpad the decrypted image data
+    # Eliminar los datos adicionados a la imagen
     unpadded_image_data = unpad(decrypted_image_data, AES.block_size)
  
     return unpadded_image_data
  
  
-# Usage:
+# Solicitar al usuario iamgen y clave
 
-image_path = input("Ingresa la ruta de la imagen")
- 
-# Generate a random encryption key
-encryption_key =  input("Ingresa una clave de encriptación de 16 caracters")
+image_path = input("Ingresa la ruta de la imagen: ")
+while len(image_path) == 0:
+    print("Debes ingresar una ruta válida")
+    image_path = input("Ingresa la ruta de la imagen: ")
+
+encryption_key =  input("Ingresa una clave de encriptación de 16 caracteres: ")
 while len(encryption_key) != 16:
-    encryption_key =  input("Ingresa una clave de encriptación de 16 caracters")
+    print("Debes ingresar una clave de 16 carateres")
+    encryption_key = input("Ingresa una clave de encriptación: ")
+encryption_bytes = bytes(encryption_key, 'utf-8')
 
-encrypted_image_data = encrypt_image(image_path, encryption_key)
+# Encriptar imagen
+encrypted_image_data = encrypt_image(image_path, encryption_bytes)
+
+encrypted_image_path = "./encrypted_image.jpg"
+with open(encrypted_image_path, 'wb') as file:
+    file.write(encrypted_image_data)
  
-# Decrypt the encrypted image data
-decrypted_image_data = decrypt_image(encrypted_image_data, encryption_key)
+# Desencriptar imagen
+decrypted_image_data = decrypt_image(encrypted_image_data, encryption_bytes)
  
-# Save the decrypted image data to a new file
+# Guardar la imagen en un nuevo archivo
 decrypted_image_path = "./decrypted_image.jpg"
 with open(decrypted_image_path, 'wb') as file:
     file.write(decrypted_image_data)
