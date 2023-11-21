@@ -1,0 +1,6 @@
+Para ejecutar el código es necesario instalar las siguientes librerías:
+
+- pip install Pillow
+- pip install pycryptodome
+
+Para correr el código ingresar la ruta de la imagen, así como una clave de encriptación, se generan la imagen encriptada y la desencriptada
