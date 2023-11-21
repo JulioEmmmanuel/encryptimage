@@ -1,7 +1,7 @@
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
- 
+from PIL import Image
  
 def encrypt_image(image_path: str, key: bytes) -> bytes:
     """
@@ -20,14 +20,19 @@ def encrypt_image(image_path: str, key: bytes) -> bytes:
     Lanza error:
     - FileNotFoundError:
          Si la imagen no se encontro
+    - IOError:
+         Si el archivo no es una imagen
     """
  
     # Lee la imagen
     try:
         with open(image_path, 'rb') as file:
             image_data = file.read()
+            #im = Image.open(image_path)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Image file '{image_path}' not found.")
+        raise FileNotFoundError(f"El archivo '{image_path}' no se encontró.")
+    except IOError:
+        raise IOError("El archivo no es una imagen válida")
  
     # Genera un vector de inicializacion aleatorio
     iv = get_random_bytes(AES.block_size)
@@ -70,12 +75,12 @@ def decrypt_image(image_path: str, key: bytes) -> bytes:
         with open(image_path, 'rb') as file:
             encrypted_image_data = file.read()
     except FileNotFoundError:
-        raise FileNotFoundError(f"Image file '{image_path}' not found.")
+        raise FileNotFoundError(f"El archivo '{image_path}' no se encontró.")
  
  
     # Vertificar la longitud de los datos de la imagen encriptada
     if len(encrypted_image_data) < AES.block_size:
-        raise ValueError("Invalid length of encrypted image data.")
+        raise ValueError("Longitud inválida de la imagen encriptada.")
  
     # Extraer el vector de inicializacion
     iv = encrypted_image_data[:AES.block_size]
